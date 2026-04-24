@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Global Chat{% endblock %}
+
+{% block navbar %}
+
+{% endblock %}
+
+{% block bottom_nav %}
+
+{% endblock %}
+
+{% block content %}
+
+<div style="padding:0px;">
+
+
+    <a href="/" style="color:#0d6efd; text-decoration:none;">
+        ← Back
+    </a>
+
+    <h3 style="color:white; margin-top:10px;">
+        🌍 Global Chat Room
+    </h3>
+
+    <div id="chatbox" class="chat-messages border p-3"
+         style="height:580px; overflow-y:scroll; margin-top:15px;">
+
+        {% for message in messages %}
+            <div class="message {% if message.user == request.user %}sender-message{% else %}receiver-message{% endif %}">
+                <p>
+                    <strong>{{ message.user.username }}:</strong>
+                    {{ message.message }}
+                </p>
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <div class="chat-form">
+        <input id="messageInput"
+               type="text"
+               class="chat-input"
+               placeholder="Type your message..."
+               autocomplete="off">
+        <button id="sendBtn" class="send-btn">Send</button>
+    </div>
+
+</div>
+
+<style>
+.chat-messages{background:#fff;border-radius:6px;}
+.message{margin-bottom:10px;padding:8px 12px;border-radius:6px;max-width:70%;}
+.sender-message{background:#d1e7ff;margin-left:auto;text-align:right;}
+.receiver-message{background:#e5e5e5;margin-right:auto;}
+.chat-form{display:flex;gap:10px;margin-top:15px;}
+.chat-input{flex:1;padding:10px;border-radius:20px;border:1px solid #ccc;}
+.send-btn{padding:10px 18px;border-radius:20px;border:none;background:#0d6efd;color:#fff;}
+body{padding-bottom:0 !important;}
+</style>
+
+<script>
+const chatBox = document.getElementById("chatbox");
+const input = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+
+const socket = new WebSocket(
+    "ws://" + window.location.host + "/ws/global-chat/"
+);
+
+
+chatBox.scrollTop = chatBox.scrollHeight;
+
+
+socket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+
+    const div = document.createElement("div");
+    div.classList.add("message");
+
+    if (data.user === "{{ request.user.username }}") {
+        div.classList.add("sender-message");
+    } else {
+        div.classList.add("receiver-message");
+    }
+
+    div.innerHTML = `
+        <p><strong>${data.user}:</strong> ${data.message}</p>
+    `;
+
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+};
+
+function sendMessage(){
+    const message = input.value;
+    if (message.trim() === "") return;
+
+    socket.send(JSON.stringify({
+        "message": message
+    }));
+
+    input.value = "";
+}
+
+sendBtn.onclick = sendMessage;
+
+input.addEventListener("keyup", function(e){
+    if(e.key === "Enter"){
+        sendMessage();
+    }
+});
+</script>
+
+{% endblock %}

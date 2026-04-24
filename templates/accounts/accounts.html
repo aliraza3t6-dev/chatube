@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+  .container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 20px;
+  }
+
+  .card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    width: 18rem;
+    padding: 15px;
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card-title {
+    color: #ffffff;
+    font-size: 18px;
+    margin: 0;
+  }
+
+  .btn {
+    display: inline-block;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #ffffff;
+    background-color: #0d6efd;
+  }
+
+  .btn:hover {
+    background-color: #0b5ed7;
+  }
+</style>
+
+<div class="container">
+    {% for user in users %} 
+    {% if not user == request.user %} 
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">{{user.username}}</h5>
+                <a href={% url "chatroom" user.username %} class="btn btn-primary">chat</a>
+            </div>
+        </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+{% endblock %}
